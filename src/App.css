@@ -1,38 +1,40 @@
 .App {
   text-align: center;
+  margin-top: 50px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+input[type="text"] {
+  padding: 10px;
+  font-size: 16px;
+  margin-right: 10px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+button {
+  padding: 10px;
+  font-size: 16px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+ul {
+  list-style-type: none;
+  padding: 0;
 }
 
-.App-link {
-  color: #61dafb;
+li {
+  text-align: center;
+  margin: 10px auto;
+  font-size: 20px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.date-heading {
+  font-size: 18px; /* 较小的字体大小更适合非主要元素 */
+  color: #007bff; /* 使用 Bootstrap 主题蓝色 */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+.task-text {
+  font-size: 20px; /* 标准文本大小 */
+  color: #333333; /* 较深的灰色，提高可读性 */
+  font-family: 'Arial', sans-serif; /* 通用字体家族 */
+  margin: 10px auto;
+}
+
