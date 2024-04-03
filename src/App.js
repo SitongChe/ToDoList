@@ -1,10 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TaskItem from './TaskItem'; // 确保正确导入 TaskItem 组件
+import RecycledTaskList from './RecycledTaskList'; // 回收站任务列表组件
 import './App.css';
 
 function App() {
   const [taskText, setTaskText] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [recycledTasks, setRecycledTasks] = useState([]); // 回收站中的任务
+
+  useEffect(() => {
+    const savedTasks = localStorage.getItem('tasks');
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks));
+    }
+    const storedRecycledTasks = localStorage.getItem('recycledTasks');
+    if (storedRecycledTasks) {
+      setRecycledTasks(JSON.parse(storedRecycledTasks));
+    }
+  }, []);
+
+  const saveTasks = (newTasks) => {
+    setTasks(newTasks);
+    localStorage.setItem('tasks', JSON.stringify(newTasks));
+  };
+
+  const saveToRecycleBin = (recycledTasks) => {
+    localStorage.setItem('recycledTasks', JSON.stringify(recycledTasks));
+  };
+
 
   const handleChange = (e) => {
     setTaskText(e.target.value);
@@ -19,17 +42,36 @@ function App() {
       date: new Date().toISOString().split('T')[0],
       completed: false,
     };
-    setTasks([newTask, ...tasks]);
+    saveTasks([newTask, ...tasks]);
     setTaskText('');
   };
 
   const handleComplete = (id) => {
-    setTasks(tasks.map(task => task.id === id ? { ...task, completed: !task.completed } : task));
+    saveTasks(tasks.map(task => task.id === id ? { ...task, completed: !task.completed } : task));
   };
 
-  const handleDelete = (id) => {
-    setTasks(tasks.filter(task => task.id !== id));
+  const handleDelete = (taskId) => {
+    const newTasks = tasks.filter(task => task.id !== taskId);
+    const recycledTask = tasks.find(task => task.id === taskId);
+    setTasks(newTasks);
+    saveTasks(newTasks);
+    setRecycledTasks([...recycledTasks, recycledTask]); 
+    const updatedRecycledTasks = [...recycledTasks, recycledTask];
+    setRecycledTasks(updatedRecycledTasks);
+    saveToRecycleBin(updatedRecycledTasks); // 更新LocalStorage中的回收站数据
   };
+
+    // 从回收站恢复任务
+    const handleRestore = (taskId) => {
+      const newRecycledTasks = recycledTasks.filter(task => task.id !== taskId);
+      const restoredTask = recycledTasks.find(task => task.id === taskId);
+      setTasks([...tasks, restoredTask]);
+      saveTasks([...tasks, restoredTask]);
+      setRecycledTasks(newRecycledTasks);
+      
+      saveToRecycleBin(newRecycledTasks); // 更新LocalStorage中的回收站数据
+    };
+  
 
   // 按日期分组任务
   const tasksByDate = tasks.reduce((acc, task) => {
@@ -57,6 +99,7 @@ function App() {
           </ul>
         </div>
       ))}
+      <RecycledTaskList tasks={recycledTasks} onRestore={handleRestore} />
     </div>
   );
 }

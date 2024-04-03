@@ -32,9 +32,10 @@ li {
 }
 
 .task-text {
-  font-size: 20px; /* 标准文本大小 */
+  font-size: 18px; /* 标准文本大小 */
   color: #333333; /* 较深的灰色，提高可读性 */
   font-family: 'Arial', sans-serif; /* 通用字体家族 */
-  margin: 10px auto;
+  margin: 5px auto;
+  line-height: 1.5;
 }
 
