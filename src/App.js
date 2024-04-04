@@ -9,15 +9,42 @@ function App() {
   const [recycledTasks, setRecycledTasks] = useState([]); // 回收站中的任务
 
   useEffect(() => {
-    const savedTasks = localStorage.getItem('tasks');
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks));
-    }
-    const storedRecycledTasks = localStorage.getItem('recycledTasks');
-    if (storedRecycledTasks) {
-      setRecycledTasks(JSON.parse(storedRecycledTasks));
-    }
+    fetch('http://localhost:3000/todos')
+      .then(response => response.json())
+      .then(data => {
+        // 使用数据更新状态
+        console.log(data);
+      })
+      .catch(error => console.error('Error fetching data:', error));
   }, []);
+
+  const createTodo = (todoText) => {
+    fetch('http://localhost:3000/todos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text: todoText }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('ToDo created:', data);
+      // 可能需要重新获取ToDo列表或直接更新前端状态
+    })
+    .catch(error => console.error('Error creating todo:', error));
+  };
+  
+
+  // useEffect(() => {
+  //   const savedTasks = localStorage.getItem('tasks');
+  //   if (savedTasks) {
+  //     setTasks(JSON.parse(savedTasks));
+  //   }
+  //   const storedRecycledTasks = localStorage.getItem('recycledTasks');
+  //   if (storedRecycledTasks) {
+  //     setRecycledTasks(JSON.parse(storedRecycledTasks));
+  //   }
+  // }, []);
 
   const saveTasks = (newTasks) => {
     setTasks(newTasks);
