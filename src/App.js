@@ -8,43 +8,42 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [recycledTasks, setRecycledTasks] = useState([]); // 回收站中的任务
 
-  useEffect(() => {
-    fetch('http://localhost:3000/todos')
-      .then(response => response.json())
-      .then(data => {
-        // 使用数据更新状态
-        console.log(data);
+  // 同步ToDo项到DynamoDB
+  const syncToDynamoDB = () => {
+    tasks.forEach((task) => {
+      // 假设每个todo项都是一个对象，有id和content属性
+      fetch('/todos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: task.id, text: task.text, completed: task.completed }),
       })
-      .catch(error => console.error('Error fetching data:', error));
-  }, []);
-
-  const createTodo = (todoText) => {
-    fetch('http://localhost:3000/todos', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ text: todoText }),
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('ToDo created:', data);
-      // 可能需要重新获取ToDo列表或直接更新前端状态
-    })
-    .catch(error => console.error('Error creating todo:', error));
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.text();
+      })
+      .then(data => {
+        console.log('ToDo synced:', data);
+      })
+      .catch(error => {
+        console.error('Error syncing todo:', error);
+      });
+    });
   };
   
-
-  // useEffect(() => {
-  //   const savedTasks = localStorage.getItem('tasks');
-  //   if (savedTasks) {
-  //     setTasks(JSON.parse(savedTasks));
-  //   }
-  //   const storedRecycledTasks = localStorage.getItem('recycledTasks');
-  //   if (storedRecycledTasks) {
-  //     setRecycledTasks(JSON.parse(storedRecycledTasks));
-  //   }
-  // }, []);
+  useEffect(() => {
+    const savedTasks = localStorage.getItem('tasks');
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks));
+    }
+    const storedRecycledTasks = localStorage.getItem('recycledTasks');
+    if (storedRecycledTasks) {
+      setRecycledTasks(JSON.parse(storedRecycledTasks));
+    }
+  }, []);
 
   const saveTasks = (newTasks) => {
     setTasks(newTasks);
@@ -80,9 +79,9 @@ function App() {
   const handleDelete = (taskId) => {
     const newTasks = tasks.filter(task => task.id !== taskId);
     const recycledTask = tasks.find(task => task.id === taskId);
-    setTasks(newTasks);
+    //setTasks(newTasks);
     saveTasks(newTasks);
-    setRecycledTasks([...recycledTasks, recycledTask]); 
+    //setRecycledTasks([...recycledTasks, recycledTask]); 
     const updatedRecycledTasks = [...recycledTasks, recycledTask];
     setRecycledTasks(updatedRecycledTasks);
     saveToRecycleBin(updatedRecycledTasks); // 更新LocalStorage中的回收站数据
@@ -112,6 +111,7 @@ function App() {
       <form onSubmit={handleSubmit}>
         <input type="text" value={taskText} onChange={handleChange} />
         <button type="submit">Add Task</button>
+        <button onClick={syncToDynamoDB}>Sync To DynamoDB</button>
       </form>
       {Object.keys(tasksByDate).sort().map((date) => (
         <div key={date}>
